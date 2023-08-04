@@ -6,31 +6,38 @@ import ListHeaderCell from "./ListHeaderCell";
 
 import styles from "./List.module.css";
 
-const List = ({ rows }) => {
-  return (
-    <table className={styles.container}>
-      <thead>
-        <ListHeader>
-          <ListHeaderCell>Order ID</ListHeaderCell>
-          <ListHeaderCell>Buy/Sell</ListHeaderCell>
-          <ListHeaderCell>Country</ListHeaderCell>
-          <ListHeaderCell>Order Submitted</ListHeaderCell>
-          <ListHeaderCell>Order Volume / USD</ListHeaderCell>
-        </ListHeader>
-      </thead>
-      <tbody>
-        {rows.map((row) => (
-          <ListRow>
-            <ListRowCell>{row["&id"]}</ListRowCell>
-            <ListRowCell>{row.executionDetails.buySellIndicator}</ListRowCell>
-            <ListRowCell>{row.executionDetails.orderStatus}</ListRowCell>
-            <ListRowCell>{row.orderSubmitted}</ListRowCell>
-            <ListRowCell>{row.bestExecutionData.orderVolume.USD}</ListRowCell>
-          </ListRow>
-        ))}
-      </tbody>
-    </table>
-  );
+const List = ({ rows, orders, currency, search, onRowClick }) => {
+	
+	// this function creates an seperate object which store values of data.json and timestamp.json
+	const data = rows.map((rows, index) => ({ ...rows, ...orders[index] }))
+
+	// this function holds the filtered item which is searched on the searchbar if it matches with the ID irespective of the case
+	const filteredItem = data.filter((item) => item["&id"].toLowerCase().includes(search.toLowerCase()))
+
+	return (
+		<table className={styles.container} >
+			<thead>
+				<ListHeader>
+					<ListHeaderCell>Order ID</ListHeaderCell>
+					<ListHeaderCell>Buy/Sell</ListHeaderCell>
+					<ListHeaderCell>Country</ListHeaderCell>
+					<ListHeaderCell>Order Submitted</ListHeaderCell>
+					<ListHeaderCell>Order Volume / {currency}</ListHeaderCell>
+				</ListHeader>
+			</thead>
+			<tbody>
+				{filteredItem.map((info) => (
+					<ListRow key={info["&key"]} item={info} onRowClick={onRowClick}>
+						<ListRowCell>{info["&id"]}</ListRowCell>
+						<ListRowCell>{info.executionDetails.buySellIndicator}</ListRowCell>
+						<ListRowCell>{info.executionDetails.orderStatus}</ListRowCell>
+						<ListRowCell>{info.timestamps.orderSubmitted}</ListRowCell>
+						<ListRowCell>{info.bestExecutionData.orderVolume[currency]}</ListRowCell> 
+					</ListRow>
+				))}
+			</tbody>
+		</table>
+	);
 };
 
 export default List;
